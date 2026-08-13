@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Campaign\Domain\ValueObjects;
 
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
+use Tests\TestCase;
 
-final class CampaignDateRangeValueObjectTest extends \PHPUnit\Framework\TestCase
+final class CampaignDateRangeValueObjectTest extends TestCase
 {
-    public function testValidCampaignDateRangeValueObject(): void
+    public function test_it_should_return_valid_campaignDateRangeValueObject(): void
     {
         $startDate = new \DateTimeImmutable('+10 days');
         $endDate = new \DateTimeImmutable('+20 days');
@@ -19,7 +20,7 @@ final class CampaignDateRangeValueObjectTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($endDate, $campaignDateRangeValueObject->endDate());
     }
 
-    public function testInvalidCampaignDateRangeValueObject(): void
+    public function test_it_should_return_invalid_campaignDateRangeValueObject(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageIsOrContains('Start date must be before end date.');
@@ -30,7 +31,7 @@ final class CampaignDateRangeValueObjectTest extends \PHPUnit\Framework\TestCase
         new CampaignDateRangeValueObject($startDate, $endDate);
     }
 
-    public function testCampaignDateRangeValueObjectWithPastDates(): void
+    public function test_it_should_return_campaignDateRangeValueObjectWithPastDates(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageIsOrContains('Campaign start date cannot be in the past.');

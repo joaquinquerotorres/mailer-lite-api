@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Domain\Aggregate;
 use App\Shared\Domain\Aggregate\AggregateRoot;
 use App\Shared\Domain\Event\DomainEvent;
 use DateTimeImmutable;
-use Override;
+use Tests\TestCase;
 
 final class TestDomainEvent implements DomainEvent
 {
@@ -29,9 +29,9 @@ final class TestAggregate extends AggregateRoot
     }
 }
 
-final class AggregateRootTest extends \PHPUnit\Framework\TestCase
+final class AggregateRootTest extends TestCase
 {
-    public function testPullDomainEventsReturnsEmptyArrayWhenNoEventsRecorded(): void
+    public function test_it_should_return_empty_array_when_no_events_recorded(): void
     {
         $aggregateRoot = new TestAggregate();
         $aggregateRoot->addRecord();

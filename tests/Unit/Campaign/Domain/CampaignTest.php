@@ -9,10 +9,11 @@ use App\Campaign\Domain\Events\CampaignPublishedEvent;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
+use Tests\TestCase;
 
-final class CampaignTest extends \PHPUnit\Framework\TestCase
+final class CampaignTest extends TestCase
 {
-    public function testPublish(): void
+    public function test_it_should_return_valid_campaign(): void
     {
         $campaign = new Campaign(
             new CampaignUuidValueObject('123e4567-e89b-12d3-a456-426614174000'),

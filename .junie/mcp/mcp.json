@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/joaquinquerotorres/.config/herd-lite/bin/php",
+            "args": [
+                "/Users/joaquinquerotorres/Projects/mailer-lite-api/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

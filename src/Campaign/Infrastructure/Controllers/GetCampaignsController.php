@@ -18,8 +18,8 @@ final class GetCampaignsController
 
     public function __invoke(Request $request): JsonResponse
     {
-        $cursor = $request->query('cursor');
-        $limit = $request->integer('limit');
+        $cursor = $request->query('cursor') ?? '';
+        $limit = $request->integer('limit') ?? 10;
         $cursor = new CursorValueObject($cursor);
         $limit = new LimitValueObject($limit);
 

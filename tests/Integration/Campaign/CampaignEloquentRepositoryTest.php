@@ -10,7 +10,8 @@ use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 use App\Campaign\Infrastructure\Repository\CampaignEloquent;
 use App\Campaign\Infrastructure\Repository\CampaignEloquentRepository;
-use App\Shared\Domain\Pagination\CursorPagination;
+use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
+use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ final class CampaignEloquentRepositoryTest extends TestCase
         }
 
         $campaignRepository = new CampaignEloquentRepository();
-        $cursorPaginationResult = $campaignRepository->paginate('', 10);
+        $cursorPaginationResult = $campaignRepository->paginate(new CursorValueObject(''), new LimitValueObject(10));
 
         $this->assertEquals($campaignsDomain, $cursorPaginationResult->items);
     }

@@ -11,6 +11,8 @@ use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 use App\Campaign\Infrastructure\Repository\CampaignEloquentRepository;
 use App\Shared\Domain\Pagination\CursorPagination;
+use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
+use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 use Tests\TestCase;
 
 final class GetCampaignsUseCaseTest extends TestCase
@@ -38,8 +40,9 @@ final class GetCampaignsUseCaseTest extends TestCase
 
         $useCase = new GetCampaignsUseCase($campaignRepository);
 
-        /** @var CursorPagination $result */
-        $result = $useCase('', 100);
+        $cursor = new CursorValueObject('');
+        $limit = new LimitValueObject(100);
+        $result = $useCase($cursor, $limit);
 
         $this->assertEquals($cursorPagination, $result);
         $this->assertEquals('next_cursor', $result->nextCursor);

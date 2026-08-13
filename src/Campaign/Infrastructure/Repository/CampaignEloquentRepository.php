@@ -10,14 +10,16 @@ use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 use App\Shared\Domain\Pagination\CursorPagination;
+use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
+use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 use Carbon\Carbon;
 
 class CampaignEloquentRepository implements CampaignRepositoryContract
 {
-    public function paginate(?string $cursor, int $limit): CursorPagination
+    public function paginate(CursorValueObject $cursor, LimitValueObject $limit): CursorPagination
     {
         $paginator = CampaignEloquent::orderBy('created_at', 'desc')
-            ->cursorPaginate($limit, ['*'], 'cursor', $cursor);
+            ->cursorPaginate($limit->value(), ['*'], 'cursor', $cursor->value());
 
         $items = [];
         foreach ($paginator->items() as $model) {
@@ -26,7 +28,7 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
 
         return new CursorPagination(
             $items,
-            $paginator->nextCursor()?->encode(), // Devuelve el string base64 o null
+            $paginator->nextCursor()?->encode(), 
             $paginator->previousCursor()?->encode()
         );
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Campaign\Application;
 
-use App\Campaign\Application\GetCampaignsUseCase;
+use App\Campaign\Application\GetCampaigns\GetCampaignsUseCase;
 use App\Campaign\Domain\Campaign;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;

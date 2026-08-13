@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Campaign\Application;
+namespace App\Campaign\Application\GetCampaigns;
 
 use App\Shared\Domain\Pagination\CursorPagination;
 

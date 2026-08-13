@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Campaign\Infrastructure\Controllers;
 
-use App\Campaign\Application\GetCampaignsQuery;
+use App\Campaign\Application\GetCampaigns\GetCampaignsQuery;
 use App\Shared\Domain\Bus\QueryBus;
 use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
 use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
@@ -25,7 +25,7 @@ final class GetCampaignsController
         $limit = new LimitValueObject($limit);
 
         $query = new GetCampaignsQuery($cursor, $limit);
-        
+
         $cursorPagination = $this->queryBus->ask($query);
 
         return response()->json($cursorPagination);

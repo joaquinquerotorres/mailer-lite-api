@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Campaign\Application\GetCampaignsQuery;
-use App\Campaign\Application\GetCampaignsQueryHandler;
+use App\Campaign\Application\GetCampaigns\GetCampaignsQuery;
+use App\Campaign\Application\GetCampaigns\GetCampaignsQueryHandler;
 use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Infrastructure\Repository\CampaignEloquentRepository;
 use App\Shared\Domain\Bus\QueryBus;

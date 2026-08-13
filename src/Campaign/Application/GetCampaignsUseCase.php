@@ -9,7 +9,7 @@ use App\Shared\Domain\Pagination\CursorPagination;
 use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
 use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 
-final class GetCampaignsUseCase
+class GetCampaignsUseCase
 {
     public function __construct(private CampaignRepository $repository) {}
 

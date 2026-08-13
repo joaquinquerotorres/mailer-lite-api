@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Campaign\Application\GetCampaignsQuery;
+use App\Campaign\Application\GetCampaignsQueryHandler;
 use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Infrastructure\Repository\CampaignEloquentRepository;
+use App\Shared\Domain\Bus\QueryBus;
+use App\Shared\Instrastructure\Bus\LaravelQueryBus;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(CampaignRepository::class, CampaignEloquentRepository::class);
+        $this->app->bind(QueryBus::class, LaravelQueryBus::class);
     }
 
     /**
@@ -21,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Bus::map([
+            GetCampaignsQuery::class => GetCampaignsQueryHandler::class,
+        ]);
     }
 }

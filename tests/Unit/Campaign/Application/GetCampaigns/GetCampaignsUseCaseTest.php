@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Campaign\Application;
+namespace App\Tests\Unit\Campaign\Application\GetCampaigns;
 
+use App\Campaign\Application\GetCampaign\GetCampaignUseCase;
 use App\Campaign\Application\GetCampaigns\GetCampaignsUseCase;
 use App\Campaign\Domain\Campaign;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
@@ -47,5 +48,21 @@ final class GetCampaignsUseCaseTest extends TestCase
         $this->assertEquals($cursorPagination, $result);
         $this->assertEquals('next_cursor', $result->nextCursor);
         $this->assertEquals('previous_cursor', $result->prevCursor);
+    }
+
+    public function test_it_should_return_a_campaign(): void
+    {
+        $campaign = new Campaign(
+            new CampaignUuidValueObject('123e4567-e89b-12d3-a456-426614174000'),
+            new CampaignNameValueObject('Spring launch'),
+            new CampaignDateRangeValueObject(
+                new \DateTimeImmutable('+10 days'),
+                new \DateTimeImmutable('+20 days')
+            )
+        );
+        $campaignRepository = $this->createMock(CampaignEloquentRepository::class);
+        $campaignRepository->method('find')->willReturn($campaign);
+        $useCase = new GetCampaignUseCase($campaignRepository);
+        $result = $useCase(new CampaignUuidValueObject('123e4567-e89b-12d3-a456-426614174000'));
     }
 }

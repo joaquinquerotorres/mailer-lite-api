@@ -13,6 +13,7 @@ use App\Shared\Domain\Pagination\CursorPagination;
 use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
 use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 use Carbon\Carbon;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CampaignEloquentRepository implements CampaignRepositoryContract
 {
@@ -28,9 +29,19 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
 
         return new CursorPagination(
             $items,
-            $paginator->nextCursor()?->encode(), 
+            $paginator->nextCursor()?->encode(),
             $paginator->previousCursor()?->encode()
         );
+    }
+
+    public function find(CampaignUuidValueObject $id): Campaign
+    {
+        $model = CampaignEloquent::where('uuid', $id->value())->first();
+        if (! $model) {
+            throw new NotFoundHttpException('Campaign not found with uuid: '.$id->value());
+        }
+
+        return $this->mapToDomain($model);
     }
 
     private function mapToDomain(CampaignEloquent $model): Campaign

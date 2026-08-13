@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Campaign\Application\GetCampaign\GetCampaignQuery;
+use App\Campaign\Application\GetCampaign\GetCampaignQueryHandler;
 use App\Campaign\Application\GetCampaigns\GetCampaignsQuery;
 use App\Campaign\Application\GetCampaigns\GetCampaignsQueryHandler;
 use App\Campaign\Domain\Contracts\CampaignRepository;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Bus::map([
             GetCampaignsQuery::class => GetCampaignsQueryHandler::class,
+            GetCampaignQuery::class => GetCampaignQueryHandler::class,
         ]);
     }
 }

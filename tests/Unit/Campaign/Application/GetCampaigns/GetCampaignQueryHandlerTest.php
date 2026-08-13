@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Campaign\Application;
+namespace Tests\Unit\Campaign\Application\GetCampaigns;
 
 use App\Campaign\Application\GetCampaigns\GetCampaignsQuery;
 use App\Campaign\Application\GetCampaigns\GetCampaignsQueryHandler;

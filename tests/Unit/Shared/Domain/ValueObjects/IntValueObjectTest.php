@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Domain\ValueObjects;
 
 use App\Shared\Domain\ValueObjects\IntValueObject;
-use Illuminate\Validation\Rules\In;
 use PHPUnit\Framework\TestCase;
 
 final class IntValueObjectTest extends TestCase

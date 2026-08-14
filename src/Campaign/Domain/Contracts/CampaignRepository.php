@@ -17,4 +17,6 @@ interface CampaignRepository
     public function find(CampaignUuidValueObject $id): Campaign;
 
     public function create(Campaign $campaign): void;
+
+    public function update(Campaign $campaign): void;
 }

@@ -49,6 +49,15 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
         CampaignEloquent::create($this->mapToEloquent($campaign));
     }
 
+    public function update(Campaign $campaign): void
+    {
+        $model = CampaignEloquent::where('uuid', $campaign->uuid()->value())->first();
+        if (!$model) {
+            throw new NotFoundHttpException('Campaign not found with uuid: '.$campaign->uuid()->value());
+        }
+        $model->update($this->mapToEloquent($campaign));
+    }
+
     private function mapToDomain(CampaignEloquent $model): Campaign
     {
         $startDate = $model->start_date instanceof Carbon

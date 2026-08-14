@@ -85,4 +85,22 @@ final class CampaignEloquentRepositoryTest extends TestCase
 
         $this->assertEquals($campaign, $campaignResult);
     }
+
+    public function test_it_should_create_a_campaign(): void
+    {
+        $campaign = new Campaign(
+            new CampaignUuidValueObject('123e4567-e89b-12d3-a456-426614174000'),
+            new CampaignNameValueObject('Test Campaign'),
+            new CampaignDateRangeValueObject(new \DateTimeImmutable('+1 day'), new \DateTimeImmutable('+2 days'))
+        );
+        $campaignRepository = new CampaignEloquentRepository;
+        $campaignRepository->create($campaign);
+        
+        $this->assertDatabaseHas('campaigns', [
+            'uuid' => $campaign->uuid()->value(),
+            'name' => $campaign->name()->value(),
+            'start_date' => $campaign->dateRange()->startDate()->format('Y-m-d'),
+            'end_date' => $campaign->dateRange()->endDate()->format('Y-m-d'),
+        ]);
+    }
 }

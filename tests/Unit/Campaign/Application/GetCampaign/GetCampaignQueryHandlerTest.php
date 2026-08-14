@@ -25,7 +25,7 @@ final class GetCampaignQueryHandlerTest extends TestCase
                 new \DateTimeImmutable('+20 days')
             )
         );
-        $query = new GetCampaignQuery(new CampaignUuidValueObject('123e4567-e89b-12d3-a456-426614174000'));
+        $query = new GetCampaignQuery('123e4567-e89b-12d3-a456-426614174000');
         $useCase = $this->createMock(GetCampaignUseCase::class);
         $useCase->method('__invoke')->willReturn($campaign);
 

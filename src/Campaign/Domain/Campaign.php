@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 namespace App\Campaign\Domain;
-use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
-use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
-use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
-use App\Shared\Domain\Aggregate\AggregateRoot;
-use App\Campaign\Domain\Events\CampaignPublishedEvent;
 
+use App\Campaign\Domain\Events\CampaignCreatedEvent;
+use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
+use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
+use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
+use App\Shared\Domain\Aggregate\AggregateRoot;
 
 final class Campaign extends AggregateRoot
 {
@@ -16,8 +16,7 @@ final class Campaign extends AggregateRoot
         private CampaignUuidValueObject $uuid,
         private CampaignNameValueObject $name,
         private CampaignDateRangeValueObject $dateRange
-    ) {
-    }
+    ) {}
 
     public function uuid(): CampaignUuidValueObject
     {
@@ -34,8 +33,8 @@ final class Campaign extends AggregateRoot
         return $this->dateRange;
     }
 
-    public function publish(): void
+    public function create(): void
     {
-        $this->record(new CampaignPublishedEvent($this->uuid->value()));
+        $this->record(new CampaignCreatedEvent($this->uuid->value()));
     }
 }

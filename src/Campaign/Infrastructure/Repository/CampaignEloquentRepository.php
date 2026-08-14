@@ -44,6 +44,11 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
         return $this->mapToDomain($model);
     }
 
+    public function create(Campaign $campaign): void
+    {
+        CampaignEloquent::create($this->mapToEloquent($campaign));
+    }
+
     private function mapToDomain(CampaignEloquent $model): Campaign
     {
         $startDate = $model->start_date instanceof Carbon
@@ -61,5 +66,15 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
             new CampaignNameValueObject($model->name),
             $dateRange,
         );
+    }
+
+    private function mapToEloquent(Campaign $campaign): CampaignEloquent
+    {
+        return new CampaignEloquent([
+            'uuid' => $campaign->uuid()->value(),
+            'name' => $campaign->name()->value(),
+            'start_date' => $campaign->dateRange()->startDate()->format('Y-m-d H:i:s'),
+            'end_date' => $campaign->dateRange()->endDate()->format('Y-m-d H:i:s'),
+        ]);
     }
 }

@@ -12,6 +12,6 @@ final class LaravelQueryBus implements QueryBus
 {
     public function ask(Query $query): mixed
     {
-        return Bus::dispatch($query);
+        return Bus::dispatchSync($query);
     }
 }

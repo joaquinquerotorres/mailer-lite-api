@@ -3,16 +3,17 @@
 declare(strict_types=1);
 
 namespace App\Campaign\Domain\Events;
+
 use App\Shared\Domain\Event\DomainEvent;
 
-final class CampaignPublishedEvent implements DomainEvent
+final class CampaignCreatedEvent implements DomainEvent
 {
     private \DateTimeImmutable $occurredOn;
 
     public function __construct(
         private readonly string $campaignUuid,
     ) {
-        $this->occurredOn = new \DateTimeImmutable();
+        $this->occurredOn = new \DateTimeImmutable;
     }
 
     public function occurredOn(): \DateTimeImmutable
@@ -22,7 +23,7 @@ final class CampaignPublishedEvent implements DomainEvent
 
     public function eventName(): string
     {
-        return 'campaign.published';
+        return 'campaign.created';
     }
 
     public function campaignUuid(): string

@@ -15,4 +15,6 @@ interface CampaignRepository
     public function paginate(CursorValueObject $cursor, LimitValueObject $limit): CursorPagination;
 
     public function find(CampaignUuidValueObject $id): Campaign;
+
+    public function create(Campaign $campaign): void;
 }

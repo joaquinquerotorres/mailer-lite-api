@@ -12,13 +12,15 @@ use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
 use App\Shared\Domain\Pagination\ValueObjects\LimitValueObject;
 use PHPUnit\Framework\TestCase;
 
-final class GetCampaignQueryHandlerTest extends TestCase
+final class GetCampaignsQueryHandlerTest extends TestCase
 {
     public function test_it_should_invoke_the_get_campaigns_query_handler()
     {
-        $query = new GetCampaignsQuery(new CursorValueObject('123'), new LimitValueObject(10));
+        $query = new GetCampaignsQuery('123', 10);
+        $cursor = new CursorValueObject('123');
+        $limit = new LimitValueObject(10);
         $getCampaignsUseCase = $this->createMock(GetCampaignsUseCase::class);
-        $getCampaignsUseCase->expects($this->once())->method('__invoke')->with($query->cursor, $query->limit)->willReturn(new CursorPagination([], null, null));
+        $getCampaignsUseCase->expects($this->once())->method('__invoke')->with($cursor, $limit)->willReturn(new CursorPagination([], null, null));
         $handler = new GetCampaignsQueryHandler($getCampaignsUseCase);
 
         $result = $handler->__invoke($query);

@@ -8,7 +8,7 @@ use App\Campaign\Domain\Campaign;
 use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 
-final class GetCampaignUseCase
+class GetCampaignUseCase
 {
     public function __construct(private CampaignRepository $repository) {}
 

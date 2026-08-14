@@ -19,7 +19,7 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
 {
     public function paginate(CursorValueObject $cursor, LimitValueObject $limit): CursorPagination
     {
-        $paginator = CampaignEloquent::orderBy('created_at', 'desc')
+        $paginator = CampaignEloquent::orderBy('uuid', 'desc')
             ->cursorPaginate($limit->value(), ['*'], 'cursor', $cursor->value());
 
         $items = [];

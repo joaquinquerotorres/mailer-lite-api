@@ -46,13 +46,13 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
 
     public function create(Campaign $campaign): void
     {
-        CampaignEloquent::create($this->mapToEloquent($campaign));
+        CampaignEloquent::insert($this->mapToEloquent($campaign)->toArray());
     }
 
     public function update(Campaign $campaign): void
     {
         $model = CampaignEloquent::where('uuid', $campaign->uuid()->value())->first();
-        if (!$model) {
+        if (! $model) {
             throw new NotFoundHttpException('Campaign not found with uuid: '.$campaign->uuid()->value());
         }
         $model->update($this->mapToEloquent($campaign));

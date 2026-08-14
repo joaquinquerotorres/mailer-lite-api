@@ -9,6 +9,7 @@ use App\Campaign\Infrastructure\Controllers\CreateCampaignController;
 use App\Http\Requests\CreateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
@@ -43,7 +44,7 @@ final class CreateCampaignControllerTest extends TestCase
         $response = $controller->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
         $this->assertEquals('application/json', $response->headers->get('Content-Type'));
         $this->assertEquals('{"message":"Campaign created successfully"}', $response->getContent());
     }

@@ -8,6 +8,7 @@ use App\Campaign\Application\GetCampaign\GetCampaignQuery;
 use App\Http\Resources\CampaignResource;
 use App\Shared\Domain\Bus\QueryBus;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 final class GetCampaignController
 {
@@ -19,6 +20,6 @@ final class GetCampaignController
 
         $campaign = $this->queryBus->ask($query);
 
-        return response()->json(new CampaignResource($campaign));
+        return response()->json(new CampaignResource($campaign), Response::HTTP_OK);
     }
 }

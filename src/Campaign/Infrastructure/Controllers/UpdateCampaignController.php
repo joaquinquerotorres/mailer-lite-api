@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 final class UpdateCampaignController
 {
@@ -26,6 +27,6 @@ final class UpdateCampaignController
 
         return response()->json([
             'message' => 'Campaign updated successfully'
-        ], 200);
+        ], Response::HTTP_OK);
     }
 }

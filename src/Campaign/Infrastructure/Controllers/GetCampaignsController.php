@@ -9,6 +9,7 @@ use App\Http\Resources\CursorResource;
 use App\Shared\Domain\Bus\QueryBus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 final class GetCampaignsController
 {
@@ -25,7 +26,7 @@ final class GetCampaignsController
 
         $cursorPagination = $this->queryBus->ask($query);
 
-        return response()->json(new CursorResource($cursorPagination));
+        return response()->json(new CursorResource($cursorPagination), Response::HTTP_OK);
 
     }
 }

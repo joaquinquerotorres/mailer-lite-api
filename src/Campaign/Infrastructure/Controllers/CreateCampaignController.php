@@ -8,6 +8,7 @@ use App\Campaign\Application\CreateCampaign\CreateCampaignCommand;
 use App\Http\Requests\CreateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Ramsey\Uuid\Uuid;
 
 class CreateCampaignController
@@ -27,6 +28,6 @@ class CreateCampaignController
 
         return response()->json([
             'message' => 'Campaign created successfully',
-        ]);
+        ], Response::HTTP_CREATED);
     }
 }

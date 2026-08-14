@@ -6,9 +6,9 @@ namespace App\Tests\Feature\Campaign\Controllers;
 
 use App\Campaign\Application\CreateCampaign\CreateCampaignCommand;
 use App\Campaign\Infrastructure\Controllers\CreateCampaignController;
+use App\Http\Requests\CreateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
@@ -20,11 +20,14 @@ final class CreateCampaignControllerTest extends TestCase
         $startDate = new \DateTimeImmutable('2027-01-05 09:00:00');
         $endDate = new \DateTimeImmutable('2027-01-31 18:00:00');
 
-        $request = Request::create('/api/campaigns', 'POST', [
+        $request = CreateCampaignRequest::create('/api/campaigns', 'POST', [
             'name' => $name,
             'startDate' => $startDate->format('Y-m-d H:i:s'),
             'endDate' => $endDate->format('Y-m-d H:i:s'),
         ]);
+        $request->setContainer($this->app);
+        $request->setRedirector($this->app->make('redirect'));
+        $request->validateResolved();
 
         $commandBus = $this->createMock(CommandBus::class);
         $commandBus->expects($this->once())

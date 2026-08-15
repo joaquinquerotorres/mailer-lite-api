@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CampaignRepository::class, CampaignEloquentRepository::class);
         $this->app->bind(QueryBus::class, LaravelQueryBus::class);
         $this->app->bind(CommandBus::class, LaravelCommandBus::class);
+
     }
 
     /**
@@ -40,4 +41,5 @@ class AppServiceProvider extends ServiceProvider
             CreateCampaignCommand::class => CreateCampaignCommandHandler::class,
         ]);
     }
+
 }

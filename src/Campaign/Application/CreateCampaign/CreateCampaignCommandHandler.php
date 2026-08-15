@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Campaign\Application\CreateCampaign;
 
 use App\Campaign\Domain\Campaign;
+use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 
 final class CreateCampaignCommandHandler
 {
-    public function __construct(private CreateCampaignUseCase $createCampaignUseCase) {}
+    public function __construct(private CampaignRepository $campaignRepository) {}
 
     public function __invoke(CreateCampaignCommand $command): void
     {
@@ -21,6 +22,6 @@ final class CreateCampaignCommandHandler
 
         $campaign = new Campaign($uuid, $name, $dateRange);
 
-        $this->createCampaignUseCase->__invoke($campaign);
+        $this->campaignRepository->create($campaign);
     }
 }

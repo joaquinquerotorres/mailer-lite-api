@@ -8,6 +8,10 @@ use App\Campaign\Application\CreateCampaign\CreateCampaignCommand;
 use App\Campaign\Application\CreateCampaign\CreateCampaignCommandHandler;
 use App\Campaign\Application\CreateCampaign\CreateCampaignUseCase;
 use App\Campaign\Domain\Campaign;
+use App\Campaign\Domain\Contracts\CampaignRepository;
+use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
+use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
+use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
@@ -22,11 +26,15 @@ class CreateCampaignCommandHandlerTest extends TestCase
             new \DateTimeImmutable('now')->modify('+2 day')
         );
 
-        $createCampaignUseCase = $this->createMock(CreateCampaignUseCase::class);
-        $createCampaignUseCase->expects($this->once())->method('__invoke')->with($this->callback(function (Campaign $campaign) use ($command) {
-            return $campaign->uuid()->value() === $command->uuid() && $campaign->name()->value() === $command->name() && $campaign->dateRange()->startDate() === $command->startDate() && $campaign->dateRange()->endDate() === $command->endDate();
-        }));
-        $handler = new CreateCampaignCommandHandler($createCampaignUseCase);
+        $campaign = new Campaign(
+            new CampaignUuidValueObject($command->uuid()),
+            new CampaignNameValueObject($command->name()),
+            new CampaignDateRangeValueObject($command->startDate(), $command->endDate())
+        );
+
+        $repository = $this->createMock(CampaignRepository::class);
+        $repository->expects($this->once())->method('create')->with($campaign);
+        $handler = new CreateCampaignCommandHandler($repository);
         $handler->__invoke($command);
 
         $this->assertTrue(true);

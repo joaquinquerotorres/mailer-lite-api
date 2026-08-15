@@ -8,6 +8,7 @@ use App\Campaign\Application\CreateCampaign\CreateCampaignCommand;
 use App\Campaign\Infrastructure\Controllers\CreateCampaignController;
 use App\Http\Requests\CreateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Ramsey\Uuid\Uuid;
@@ -15,6 +16,8 @@ use Tests\TestCase;
 
 final class CreateCampaignControllerTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_it_should_create_a_campaign(): void
     {
         $name = 'Test Campaign';

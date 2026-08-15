@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Campaign;
 
 use App\Campaign\Domain\Campaign;
+use App\Campaign\Domain\DTO\CampaignDTO;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
@@ -26,10 +27,11 @@ final class CampaignEloquentRepositoryTest extends TestCase
 
         $campaignsDomain = [];
         foreach ($campaignsEloquentCreated as $campaignEloquent) {
-            $campaignsDomain[] = new Campaign(
-                new CampaignUuidValueObject($campaignEloquent->uuid),
-                new CampaignNameValueObject($campaignEloquent->name),
-                new CampaignDateRangeValueObject($campaignEloquent->start_date->toDateTimeImmutable(), $campaignEloquent->end_date->toDateTimeImmutable())
+            $campaignsDomain[] = new CampaignDTO(
+                $campaignEloquent->uuid,
+                $campaignEloquent->name,
+                new \DateTimeImmutable($campaignEloquent->start_date),
+                new \DateTimeImmutable($campaignEloquent->end_date)
             );
         }
 
@@ -42,10 +44,11 @@ final class CampaignEloquentRepositoryTest extends TestCase
     public function test_it_should_return_a_campaign(): void
     {
         $campaignEloquent = CampaignEloquent::factory()->create();
-        $campaign = new Campaign(
-            new CampaignUuidValueObject($campaignEloquent->uuid),
-            new CampaignNameValueObject($campaignEloquent->name),
-            new CampaignDateRangeValueObject($campaignEloquent->start_date->toDateTimeImmutable(), $campaignEloquent->end_date->toDateTimeImmutable())
+        $campaign = new CampaignDTO(
+            $campaignEloquent->uuid,
+            $campaignEloquent->name,
+            new \DateTimeImmutable($campaignEloquent->start_date),
+            new \DateTimeImmutable($campaignEloquent->end_date)
         );
         $campaignRepository = new CampaignEloquentRepository;
         $campaignResult = $campaignRepository->find(new CampaignUuidValueObject($campaignEloquent->uuid));
@@ -70,13 +73,11 @@ final class CampaignEloquentRepositoryTest extends TestCase
         $this->assertIsString($campaignEloquent->start_date);
         $this->assertIsString($campaignEloquent->end_date);
 
-        $campaign = new Campaign(
-            new CampaignUuidValueObject($campaignEloquent->uuid),
-            new CampaignNameValueObject($campaignEloquent->name),
-            new CampaignDateRangeValueObject(
-                new \DateTimeImmutable($campaignEloquent->start_date),
-                new \DateTimeImmutable($campaignEloquent->end_date)
-            )
+        $campaign = new CampaignDTO(
+            $campaignEloquent->uuid,
+            $campaignEloquent->name,
+            new \DateTimeImmutable($campaignEloquent->start_date),
+            new \DateTimeImmutable($campaignEloquent->end_date)
         );
 
         $campaignRepository = new CampaignEloquentRepository;
@@ -95,12 +96,32 @@ final class CampaignEloquentRepositoryTest extends TestCase
         );
         $campaignRepository = new CampaignEloquentRepository;
         $campaignRepository->create($campaign);
-        
+
         $this->assertDatabaseHas('campaigns', [
             'uuid' => $campaign->uuid()->value(),
             'name' => $campaign->name()->value(),
             'start_date' => $campaign->dateRange()->startDate()->format('Y-m-d'),
             'end_date' => $campaign->dateRange()->endDate()->format('Y-m-d'),
+        ]);
+    }
+
+    public function test_it_should_update_a_campaign(): void
+    {
+        $campaign = CampaignEloquent::factory()->create();
+
+        $campaignToUpdate = new Campaign(
+            new CampaignUuidValueObject($campaign->uuid),
+            new CampaignNameValueObject('Test Campaign Updated'),
+            new CampaignDateRangeValueObject(new \DateTimeImmutable($campaign->start_date), new \DateTimeImmutable($campaign->end_date))
+        );
+        $campaignRepository = new CampaignEloquentRepository;
+        $campaignRepository->update($campaignToUpdate);
+
+        $this->assertDatabaseHas('campaigns', [
+            'uuid' => $campaignToUpdate->uuid()->value(),
+            'name' => $campaignToUpdate->name()->value(),
+            'start_date' => $campaignToUpdate->dateRange()->startDate()->format('Y-m-d'),
+            'end_date' => $campaignToUpdate->dateRange()->endDate()->format('Y-m-d'),
         ]);
     }
 }

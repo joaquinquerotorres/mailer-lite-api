@@ -8,12 +8,15 @@ use App\Campaign\Application\UpdateCampaign\UpdateCampaignCommand;
 use App\Campaign\Infrastructure\Controllers\UpdateCampaignController;
 use App\Http\Requests\UpdateCampaignRequest;
 use App\Shared\Domain\Bus\CommandBus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\JsonResponse;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
 final class UpdateCampaignControllerTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_it_should_create_a_campaign(): void
     {
         $name = 'Test Campaign';
@@ -33,7 +36,7 @@ final class UpdateCampaignControllerTest extends TestCase
         $commandBus = $this->createMock(CommandBus::class);
         $commandBus->expects($this->once())
             ->method('dispatch')
-            ->with($this->callback(function (UpdateCampaignCommand $command) use ($uuid, $name, $startDate, $endDate): bool {
+            ->with($this->callback(function (UpdateCampaignCommand $command) use ($name, $startDate, $endDate): bool {
                 return Uuid::isValid($command->campaignUuid())
                     && $command->name() === $name
                     && $command->startDate() == $startDate

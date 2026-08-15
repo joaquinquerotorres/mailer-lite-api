@@ -12,6 +12,6 @@ final class LaravelCommandBus implements CommandBus
 {
     public function dispatch(Command $command): void
     {
-        Bus::dispatchSync($command);
+        Bus::dispatch($command);
     }
 }

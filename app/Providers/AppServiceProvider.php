@@ -8,6 +8,8 @@ use App\Campaign\Application\GetCampaign\GetCampaignQuery;
 use App\Campaign\Application\GetCampaign\GetCampaignQueryHandler;
 use App\Campaign\Application\GetCampaigns\GetCampaignsQuery;
 use App\Campaign\Application\GetCampaigns\GetCampaignsQueryHandler;
+use App\Campaign\Application\SendCampaign\SendCampaignCommand;
+use App\Campaign\Application\SendCampaign\SendCampaignCommandHandler;
 use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Infrastructure\Repository\CampaignEloquentRepository;
 use App\Shared\Domain\Bus\CommandBus;
@@ -39,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
             GetCampaignsQuery::class => GetCampaignsQueryHandler::class,
             GetCampaignQuery::class => GetCampaignQueryHandler::class,
             CreateCampaignCommand::class => CreateCampaignCommandHandler::class,
+            SendCampaignCommand::class => SendCampaignCommandHandler::class,
         ]);
     }
-
 }

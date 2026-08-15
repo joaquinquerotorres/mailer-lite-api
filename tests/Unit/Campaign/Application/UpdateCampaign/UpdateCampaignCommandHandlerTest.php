@@ -8,6 +8,7 @@ use App\Campaign\Application\UpdateCampaign\UpdateCampaignCommand;
 use App\Campaign\Application\UpdateCampaign\UpdateCampaignCommandHandler;
 use App\Campaign\Application\UpdateCampaign\UpdateCampaignUseCase;
 use App\Campaign\Domain\Campaign;
+use App\Campaign\Domain\Contracts\CampaignRepository;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
@@ -17,16 +18,21 @@ final class UpdateCampaignCommandHandlerTest extends TestCase
 {
     public function test_it_should_return_a_update_campaign_command_handler()
     {
-        $command = new UpdateCampaignCommand('123e4567-e89b-12d3-a456-426614174000', 'Test Campaign', new \DateTimeImmutable('+1 day'), new \DateTimeImmutable('+2 days'));
+        $command = new UpdateCampaignCommand(
+            '123e4567-e89b-12d3-a456-426614174000', 
+            'Test Campaign', 
+            new \DateTimeImmutable('+1 day'), 
+            new \DateTimeImmutable('+2 days')
+        );
 
         $campaign = new Campaign(
             new CampaignUuidValueObject($command->campaignUuid()),
             new CampaignNameValueObject($command->name()),
             new CampaignDateRangeValueObject($command->startDate(), $command->endDate())
         );
-        $useCase = $this->createMock(UpdateCampaignUseCase::class);
-        $useCase->expects($this->once())->method('__invoke')->with($campaign);
-        $commandHandler = new UpdateCampaignCommandHandler($useCase);
+        $repository = $this->createMock(CampaignRepository::class);
+        $repository->expects($this->once())->method('update')->with($campaign);
+        $commandHandler = new UpdateCampaignCommandHandler($repository);
 
         $commandHandler->__invoke($command);
 

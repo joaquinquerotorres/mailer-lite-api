@@ -55,7 +55,11 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
         if (! $model) {
             throw new NotFoundHttpException('Campaign not found with uuid: '.$campaign->uuid()->value());
         }
-        $model->update($this->mapToEloquent($campaign));
+        $model->update([
+            'name' => $campaign->name()->value(),
+            'start_date' => $campaign->dateRange()->startDate()->format('Y-m-d H:i:s'),
+            'end_date' => $campaign->dateRange()->endDate()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     private function mapToDomain(CampaignEloquent $model): CampaignDTO

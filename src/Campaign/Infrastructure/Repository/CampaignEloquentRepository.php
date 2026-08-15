@@ -6,8 +6,8 @@ namespace App\Campaign\Infrastructure\Repository;
 
 use App\Campaign\Domain\Campaign;
 use App\Campaign\Domain\Contracts\CampaignRepository as CampaignRepositoryContract;
+use App\Campaign\Domain\DTO\CampaignDTO;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
-use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
 use App\Shared\Domain\Pagination\CursorPagination;
 use App\Shared\Domain\Pagination\ValueObjects\CursorValueObject;
@@ -34,7 +34,7 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
         );
     }
 
-    public function find(CampaignUuidValueObject $id): Campaign
+    public function find(CampaignUuidValueObject $id): CampaignDTO
     {
         $model = CampaignEloquent::where('uuid', $id->value())->first();
         if (! $model) {
@@ -58,7 +58,7 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
         $model->update($this->mapToEloquent($campaign));
     }
 
-    private function mapToDomain(CampaignEloquent $model): Campaign
+    private function mapToDomain(CampaignEloquent $model): CampaignDTO
     {
         $startDate = $model->start_date instanceof Carbon
         ? $model->start_date->toDateTimeImmutable()
@@ -68,12 +68,11 @@ class CampaignEloquentRepository implements CampaignRepositoryContract
             ? $model->end_date->toDateTimeImmutable()
             : new \DateTimeImmutable($model->end_date);
 
-        $dateRange = new CampaignDateRangeValueObject($startDate, $endDate);
-
-        return new Campaign(
-            new CampaignUuidValueObject($model->uuid),
-            new CampaignNameValueObject($model->name),
-            $dateRange,
+        return new CampaignDTO(
+            $model->uuid,
+            $model->name,
+            $startDate,
+            $endDate
         );
     }
 

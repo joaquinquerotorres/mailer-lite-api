@@ -18,8 +18,8 @@ final class GetCampaignController
     {
         $query = new GetCampaignQuery($campaignUuid);
 
-        $campaign = $this->queryBus->ask($query);
+        $campaignDTO = $this->queryBus->ask($query);
 
-        return response()->json(new CampaignResource($campaign), Response::HTTP_OK);
+        return response()->json(new CampaignResource($campaignDTO), Response::HTTP_OK);
     }
 }

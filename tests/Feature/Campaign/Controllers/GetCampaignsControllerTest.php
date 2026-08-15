@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Feature\Campaign\Controllers;
 
 use App\Campaign\Domain\Campaign;
+use App\Campaign\Domain\DTO\CampaignDTO;
 use App\Campaign\Domain\ValueObjects\CampaignDateRangeValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignNameValueObject;
 use App\Campaign\Domain\ValueObjects\CampaignUuidValueObject;
@@ -27,13 +28,11 @@ final class GetCampaignsControllerTest extends TestCase
 
         $items = [];
         foreach ($paginator->items() as $model) {
-            $items[] = new Campaign(
-                new CampaignUuidValueObject($model->uuid),
-                new CampaignNameValueObject($model->name),
-                new CampaignDateRangeValueObject(
-                    $model->start_date->toDateTimeImmutable(),
-                    $model->end_date->toDateTimeImmutable(),
-                ),
+            $items[] = new CampaignDTO(
+                $model->uuid,
+                $model->name,
+                $model->start_date->toDateTimeImmutable(),
+                $model->end_date->toDateTimeImmutable()
             );
         }
 

@@ -1,58 +1,211 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MailerLite Campaign API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+HTTP API for creating, updating, listing, and sending email campaigns. The application is built with **Laravel 13** and **PHP 8.3+**, using **CQRS** and **hexagonal architecture** so the campaign domain stays independent of the web framework and persistence details.
 
-## About Laravel
+## Architecture
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Business logic lives under `src/`, not under Laravel’s default `app/` tree (except HTTP Form Requests, API Resources, and service providers). Autoloading maps `App\` to both `app/` and `src/`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+src/
+├── Campaign/
+│   ├── Domain/            # Entities, value objects, repository contract, events, DTOs
+│   ├── Application/       # Commands, queries, and handlers (use cases)
+│   └── Infrastructure/    # HTTP controllers, Eloquent adapter, persistence mapping
+└── Shared/
+    ├── Domain/            # Buses, aggregate root, pagination, generic value objects
+    └── Instrastructure/   # Laravel implementations of the buses
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Hexagonal architecture
 
-## Contributing
+The campaign bounded context is split into three layers:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Layer | Responsibility | Depends on |
+| --- | --- | --- |
+| **Domain** | `Campaign` aggregate, value objects (`uuid`, `name`, date range), `CampaignRepository` contract, domain events | Nothing outside the domain |
+| **Application** | Use cases as command/query handlers | Domain only |
+| **Infrastructure** | Controllers, `CampaignEloquentRepository`, Laravel buses | Application + Domain + Laravel |
 
-## Code of Conduct
+Inbound adapter: HTTP controllers in `src/Campaign/Infrastructure/Controllers`. They validate input, build a command or query, and talk to a bus — they never call Eloquent or domain services directly.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Outbound adapter: `CampaignEloquentRepository` implements `CampaignRepository`. The rest of the application depends on the interface; swapping storage does not change handlers.
 
-## Security Vulnerabilities
+```text
+HTTP  →  Controller  →  Command/Query Bus  →  Handler  →  CampaignRepository (port)
+                                                              │
+                                                              ▼
+                                                    Eloquent repository (adapter)
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### CQRS
 
-## License
+Reads and writes are separate models:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Commands (writes)**
+
+| Command | Handler | Delivery |
+| --- | --- | --- |
+| `CreateCampaignCommand` | `CreateCampaignCommandHandler` | Synchronous |
+| `UpdateCampaignCommand` | `UpdateCampaignCommandHandler` | Synchronous |
+| `SendCampaignCommand` | `SendCampaignCommandHandler` | **Asynchronous** (`ShouldQueue`) |
+
+**Queries (reads)**
+
+| Query | Handler | Delivery |
+| --- | --- | --- |
+| `GetCampaignQuery` | `GetCampaignQueryHandler` | Synchronous |
+| `GetCampaignsQuery` | `GetCampaignsQueryHandler` | Synchronous |
+
+Handlers are mapped in `AppServiceProvider` via Laravel’s `Bus::map()`. Controllers never instantiate handlers.
+
+Domain events exist on the aggregate (`CampaignCreatedEvent` via `AggregateRoot::record()` / `pullDomainEvents()`), so the model can publish facts without coupling to Laravel’s event system.
+
+## Buses (sync and async)
+
+Two ports in `src/Shared/Domain/Bus` hide Laravel’s bus:
+
+- **`QueryBus`** (`LaravelQueryBus`) always uses `Bus::dispatchSync()`. Queries return data and must finish in the same request.
+- **`CommandBus`** (`LaravelCommandBus`) uses `Bus::dispatch()`. Behaviour depends on the command:
+  - Create and update are **synchronous** (plain `Command` objects).
+  - Send implements `ShouldQueue`, so it is **pushed to the queue** and processed by a worker. The HTTP response is `202 Accepted` as soon as the command is dispatched.
+  - Failed send jobs retry with backoff **60s, 120s, 180s**.
+
+Run a worker when using a real queue (not `sync`):
+
+```bash
+php artisan queue:work redis
+```
+
+## Redis
+
+Redis is used in two places in the send flow:
+
+1. **Queue backend** for `SendCampaignCommand` (`QUEUE_CONNECTION=redis`). The worker consumes jobs from Redis instead of blocking the HTTP request.
+2. **Distributed lock** in `SendCampaignCommandHandler` via `Cache::lock()` (`CACHE_STORE=redis`), key `campaign:sent:{uuid}`, TTL 60 seconds. If another worker already holds the lock, the send is skipped so the same campaign is not emailed twice.
+
+Point the app at Redis in `.env`:
+
+```env
+QUEUE_CONNECTION=redis
+CACHE_STORE=redis
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+```
+
+## HTTP API
+
+Laravel prefixes API routes with `/api`. JSON is returned for `api/*` requests. There is no authentication layer on these endpoints.
+
+| Method | Path | Description | Status |
+| --- | --- | --- | --- |
+| `GET` | `/api/campaigns` | Cursor-paginated list | `200` |
+| `GET` | `/api/campaigns/{campaignUuid}` | Single campaign | `200` |
+| `POST` | `/api/campaigns` | Create campaign | `201` |
+| `PUT` | `/api/campaigns/{campaignUuid}` | Update campaign | `200` |
+| `POST` | `/api/campaigns/{campaignUuid}/send` | Queue campaign send | `202` |
+| `GET` | `/up` | Health check | `200` |
+
+### List campaigns
+
+Query parameters:
+
+- `cursor` — opaque cursor from a previous page (optional)
+- `limit` — page size (optional)
+
+Response shape:
+
+```json
+{
+  "items": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Spring launch",
+      "startDate": "2026-09-01",
+      "endDate": "2026-09-30"
+    }
+  ],
+  "nextCursor": "...",
+  "prevCursor": null
+}
+```
+
+### Create / update body
+
+```json
+{
+  "name": "Spring launch",
+  "startDate": "2026-09-01",
+  "endDate": "2026-09-30"
+}
+```
+
+Validation: `name` required string (max 255 at HTTP, max 100 in the domain), `startDate` and `endDate` required dates, `endDate` after `startDate`. The domain also rejects a start date in the past.
+
+Missing campaigns respond with **404**.
+
+Send currently mails a fixed recipient from `SendCampaignCommandHandler` (markdown mailable `mail.campaign-sent`).
+
+## Persistence
+
+Campaigns are stored in `campaigns`: `uuid` (unique), `name`, `start_date`, `end_date`, timestamps. Listing uses Eloquent **cursor pagination** ordered by `uuid` descending.
+
+Default local database in `.env.example` is SQLite.
+
+## Tests
+
+The suite uses **Pest 5** (PHPUnit under the hood). Coverage is collected for `src/` only (`phpunit.xml`).
+
+| Suite | Location | What it covers |
+| --- | --- | --- |
+| Unit | `tests/Unit` | Value objects, aggregate, commands/queries and handlers (repository mocked) |
+| Feature | `tests/Feature` | HTTP controllers and status codes |
+| Integration | `tests/Integration` | Eloquent repository and bus wiring (not in the default PHPUnit suites) |
+
+Current default run (Unit + Feature):
+
+- **30 tests**, **87 assertions**, all passing
+- **85.0%** line coverage of `src/`
+
+Lowest coverage is `CampaignEloquentRepository` (~49%) because the integration tests are not included in `phpunit.xml`. Application handlers and HTTP controllers are at or near 100%, except parts of the async send path (queue backoff, Redis lock skip, mailable view).
+
+```bash
+php artisan test --compact
+php artisan test --compact --coverage
+```
+
+Coverage needs [PCOV](https://github.com/krakjoe/pcov) or Xdebug.
+
+## Requirements
+
+- PHP 8.3+ (8.5 supported)
+- Composer
+- Redis (queue + locks in the send flow)
+- Node.js only if you need the default Laravel frontend assets
+
+## Setup
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+```
+
+Then configure Redis as shown above and start:
+
+```bash
+php artisan serve
+php artisan queue:work redis
+```
+
+Or `composer run dev` for the bundled Laravel dev process.
+
+## Stack
+
+- Laravel 13, PHP 8.3+
+- Eloquent as the persistence adapter
+- Laravel Bus as the command/query transport
+- Redis for queued send commands and send locks
+- Pest for tests, Pint for PHP style (`vendor/bin/pint`)
